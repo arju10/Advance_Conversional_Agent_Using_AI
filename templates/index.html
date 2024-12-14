@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational Agent</title>
+</head>
+<body>
+    <h1>Welcome to the Conversational Agent</h1>
+    <form id="queryForm">
+        <input type="text" id="queryInput" placeholder="Ask something..." required>
+        <button type="submit">Send</button>
+    </form>
+    <div id="response"></div>
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('queryInput').value;
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+            document.getElementById('response').innerText = data.response;
+        });
+    </script>
+</body>
+</html>
