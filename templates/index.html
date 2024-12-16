@@ -19,6 +19,15 @@
             background-color: #f0f0f0;
             border-radius: 5px;
         }
+        #mic-icon {
+            font-size: 36px;
+            cursor: pointer;
+            color: red;
+            margin-top: 10px;
+        }
+        #mic-icon.active {
+            color: green;
+        }
     </style>
 </head>
 <body>
@@ -27,12 +36,13 @@
 
     <!-- Avatar Image (D-ID Animation) -->
     <div>
-        <img id="avatar" src="https://studio.d-id.com/share?id=667985252804bf456d9241b7f17fb893&utm_source=copy" alt="Avatar">
+        <img id="avatar" src="static/avatar.png" alt="Avatar">
     </div>
 
-    <!-- User Input (Text) -->
+    <!-- User Input (Text or Mic) -->
     <input type="text" id="user-query" placeholder="Ask me something...">
     <button onclick="sendQuery()">Ask</button>
+    <div id="mic-icon" onclick="startSpeechToText()">🎤</div>
 
     <!-- Response Box -->
     <div id="response-box">
@@ -41,6 +51,45 @@
     </div>
 
     <script>
+        let recognition; // STT API recognition object
+
+        // Initialize Speech-to-Text
+        function startSpeechToText() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support Speech-to-Text.");
+                return;
+            }
+
+            // Create a new recognition instance if not already created
+            if (!recognition) {
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    document.getElementById('mic-icon').classList.add('active');
+                };
+
+                recognition.onend = () => {
+                    document.getElementById('mic-icon').classList.remove('active');
+                };
+
+                recognition.onresult = (event) => {
+                    const query = event.results[0][0].transcript;
+                    document.getElementById('user-query').value = query;
+                    sendQuery(); // Automatically send the spoken query
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Speech recognition error:", event.error);
+                    alert("An error occurred during speech recognition.");
+                };
+            }
+
+            recognition.start();
+        }
+
         // Function to send user query to the backend
         function sendQuery() {
             const query = document.getElementById('user-query').value;
@@ -68,11 +117,10 @@
                     alert('An error occurred while processing your request.');
                 });
             } else {
-                alert("Please type something!");
+                alert("Please type or say something!");
             }
         }
     </script>
 
 </body>
 </html>
-
