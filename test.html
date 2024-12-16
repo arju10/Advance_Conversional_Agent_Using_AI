@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational Agent</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        canvas {
+            width: 500px;
+            height: 600px;
+            margin: auto;
+            display: block;
+        }
+
+        #query-container {
+            margin-top: 20px;
+        }
+
+        #response-container {
+            margin-top: 20px;
+        }
+
+        #user-query {
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Conversational Agent</h1>
+    <div id="avatar-container">
+        <canvas id="avatar"></canvas>
+    </div>
+    <div id="query-container">
+        <input type="text" id="user-query" placeholder="Ask your question here..." />
+        <button onclick="askQuery()">Ask</button>
+    </div>
+    <div id="response-container">
+        <p id="response-text"></p>
+        <audio id="response-audio" controls></audio>
+    </div>
+
+    <script>
+        // Three.js setup for the Ready Player Me avatar
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('avatar') });
+
+        renderer.setSize(500, 600);
+        camera.position.z = 2;
+
+        // Load the Ready Player Me avatar
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            'https://studio.d-id.com/share?id=667985252804bf456d9241b7f17fb893&utm_source=copy', // Avatar URL
+            (gltf) => {
+                scene.add(gltf.scene);
+                animate();
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading avatar:', error);
+            }
+        );
+
+        // Animation loop for the avatar
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // Function to send query to the backend and get the avatar's response
+        async function askQuery() {
+            const query = document.getElementById('user-query').value;
+            const response = await fetch('http://localhost:5000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+            document.getElementById('response-text').innerText = data.text; // Show response text
+            document.getElementById('response-audio').src = data.audio_path; // Play audio
+        }
+    </script>
+</body>
+</html> 
+

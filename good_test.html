@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Avatar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #avatar {
+            width: 400px;
+            height: 400px;
+        }
+        #response-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Interactive Avatar</h1>
+
+    <!-- Avatar Image (D-ID Animation) -->
+    <div>
+        <img id="avatar" src="https://studio.d-id.com/share?id=667985252804bf456d9241b7f17fb893&utm_source=copy" alt="Avatar">
+    </div>
+
+    <!-- User Input (Text) -->
+    <input type="text" id="user-query" placeholder="Ask me something...">
+    <button onclick="sendQuery()">Ask</button>
+
+    <!-- Response Box -->
+    <div id="response-box">
+        <p id="response-text"></p>
+        <audio id="response-audio" controls></audio>
+    </div>
+
+    <script>
+        // Function to send user query to the backend
+        function sendQuery() {
+            const query = document.getElementById('user-query').value;
+            
+            if (query) {
+                fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update response text
+                    document.getElementById('response-text').innerText = data.response;
+
+                    // Update and play the audio
+                    const audio = document.getElementById('response-audio');
+                    audio.src = data.audio_path;
+                    audio.play();
+                });
+            } else {
+                alert("Please type something!");
+            }
+        }
+    </script>
+
+</body>
+</html>
